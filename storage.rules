@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidImageFile() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 2 * 1024 * 1024; // 2MB
+    }
+    
+    function isValidPDFFile() {
+      return request.resource.contentType == 'application/pdf' &&
+             request.resource.size < 5 * 1024 * 1024; // 5MB
+    }
+    
+    // ============================================
+    // RESUMES STORAGE
+    // ============================================
+    match /resumes/{userId}/{fileName} {
+      // Only the user can read their own resume
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // Alumni can read resumes for resume review
+      allow read: if isAuthenticated() && 
+        exists(/databases/(default)/documents/resumeRequests/$(request.auth.uid));
+      
+      // Only the user can upload to their own folder
+      allow create, update: if isAuthenticated() && 
+        isOwner(userId) && isValidPDFFile();
+      
+      // Only the user can delete their own resume
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ============================================
+    // EVENT POSTERS STORAGE
+    // ============================================
+    match /events/{eventId}/{fileName} {
+      // Anyone authenticated can read event posters
+      allow read: if isAuthenticated();
+      
+      // Only event creator can upload poster
+      allow create, update: if isAuthenticated() && 
+        isValidImageFile();
+      
+      // Only event creator can delete poster
+      allow delete: if isAuthenticated();
+    }
+    
+    // ============================================
+    // PROFILE PICTURES STORAGE
+    // ============================================
+    match /profiles/{userId}/{fileName} {
+      // Anyone authenticated can read profile pictures
+      allow read: if isAuthenticated();
+      
+      // Only the user can upload their own profile picture
+      allow create, update: if isAuthenticated() && 
+        isOwner(userId) && isValidImageFile();
+      
+      // Only the user can delete their own profile picture
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ============================================
+    // CHAT FILES STORAGE
+    // ============================================
+    match /chats/{chatId}/{fileName} {
+      // Only chat participants can read files
+      allow read: if isAuthenticated();
+      
+      // Only chat participants can upload files
+      allow create, update: if isAuthenticated() && 
+        (isValidImageFile() || isValidPDFFile());
+      
+      // Only uploader can delete files
+      allow delete: if isAuthenticated();
+    }
+  }
+}
