@@ -87,7 +87,7 @@ export default function EventsPage() {
     }
   }
 
-  const filteredEvents = eventsData.filter(
+  const filteredEvents = allEvents.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.category.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -120,7 +120,7 @@ export default function EventsPage() {
         <div className="grid md:grid-cols-2 gap-6">
           {filteredEvents.map((event) => (
             <div
-              key={event.id}
+              key={event.eventId}
               className="bg-card border border-border rounded-lg p-6 hover:border-primary hover:shadow-lg transition-all"
             >
               <div className="mb-4">
@@ -141,15 +141,15 @@ export default function EventsPage() {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <span>👤</span>
-                  <span>{event.organizer}</span>
+                  <span>{event.createdByName || 'Unknown Organizer'}</span>
                 </div>
               </div>
 
-              {ratings[event.id] && (
+              {ratings[event.eventId as any] && (
                 <div className="bg-muted/50 p-2 rounded mb-3 text-xs">
                   <div className="flex gap-1 mb-1">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i}>{i < ratings[event.id].rating ? "⭐" : "☆"}</span>
+                      <span key={i}>{i < ratings[event.eventId as any].rating ? "⭐" : "☆"}</span>
                     ))}
                   </div>
                   Your rating
@@ -158,17 +158,17 @@ export default function EventsPage() {
 
               <div className="flex gap-2">
                 <Button
-                  onClick={() => handleRegisterEvent(event.id, event.title)}
-                  className={registeredEvents.includes(event.id) ? "flex-1 bg-green-600 hover:bg-green-700" : "flex-1"}
+                  onClick={() => handleRegisterEvent(event.eventId as any, event.title)}
+                  className={registeredEvents.includes(event.eventId as any) ? "flex-1 bg-green-600 hover:bg-green-700 hover:scale-[1.02] hover-lift transition-all" : "flex-1 hover:scale-[1.02] hover-lift transition-all"}
                 >
-                  {registeredEvents.includes(event.id) ? "✓ Registered" : "Register"}
+                  {registeredEvents.includes(event.eventId as any) ? "✓ Registered" : "Register"}
                 </Button>
 
                 <button
-                  onClick={() => setRatingModal({ isOpen: true, eventId: event.id, eventTitle: event.title })}
-                  className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors font-medium text-sm"
+                  onClick={() => setRatingModal({ isOpen: true, eventId: event.eventId as any, eventTitle: event.title })}
+                  className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors font-medium text-sm hover:scale-[1.02] hover-lift transition-all"
                 >
-                  {ratings[event.id] ? "Update" : "Rate"}
+                  {ratings[event.eventId as any] ? "Update" : "Rate"}
                 </button>
               </div>
             </div>

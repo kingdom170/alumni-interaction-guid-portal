@@ -6,6 +6,9 @@ import { Navbar } from "@/components/navbar"
 import { alumniData, eventsData, jobsData, eventQueryMessages } from "@/lib/data"
 import Link from "next/link"
 import { GlobalChat } from "@/components/global-chat"
+import { useEffect } from "react"
+import { getAllEvents, registerForEvent, type EventData } from "@/lib/firestore/event-service"
+import { EventRegistrationModal, type RegistrationData } from "@/components/event-registration-modal"
 
 export default function UserDashboard() {
   const [registeredEvents, setRegisteredEvents] = useState<number[]>([])
@@ -13,12 +16,45 @@ export default function UserDashboard() {
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null)
   const [queryMessages, setQueryMessages] = useState<typeof eventQueryMessages>(eventQueryMessages)
   const [queryText, setQueryText] = useState("")
+  
+  const [allEvents, setAllEvents] = useState<EventData[]>([])
+  const [registrationModal, setRegistrationModal] = useState<{
+    isOpen: boolean
+    eventId: string | null
+    eventTitle: string
+  }>({ isOpen: false, eventId: null, eventTitle: "" })
 
-  const handleRegisterEvent = (eventId: number) => {
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const events = await getAllEvents()
+      setAllEvents(events)
+    }
+    fetchEvents()
+  }, [])
+
+  const handleRegisterEvent = (eventId: any, eventTitle: string) => {
     if (registeredEvents.includes(eventId)) {
       setRegisteredEvents(registeredEvents.filter((id) => id !== eventId))
     } else {
-      setRegisteredEvents([...registeredEvents, eventId])
+      setRegistrationModal({ isOpen: true, eventId, eventTitle })
+    }
+  }
+
+  const handleRegistrationSubmit = async (data: RegistrationData) => {
+    if (registrationModal.eventId) {
+      try {
+        await registerForEvent(registrationModal.eventId, {
+          ...data,
+          userName: data.fullName,
+          userEmail: data.email,
+          userPhone: data.phone,
+        })
+        setRegisteredEvents([...registeredEvents, registrationModal.eventId as any])
+        setRegistrationModal({ isOpen: false, eventId: null, eventTitle: "" })
+        alert(`Registration successful for ${registrationModal.eventTitle}!`)
+      } catch (error) {
+        alert("Failed to register for event. Please try again.")
+      }
     }
   }
 
@@ -75,9 +111,9 @@ export default function UserDashboard() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {eventsData.slice(0, 2).map((event) => (
+            {allEvents.slice(0, 2).map((event) => (
               <div
-                key={event.id}
+                key={event.eventId}
                 className="bg-card border border-border rounded-lg p-6 hover:border-primary hover:shadow-lg transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -96,26 +132,26 @@ export default function UserDashboard() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span>👤</span>
-                    <span>{event.organizer}</span>
+                    <span>{event.createdByName || 'Unknown'}</span>
                   </div>
                 </div>
                 <Button
-                  onClick={() => handleRegisterEvent(event.id)}
+                  onClick={() => handleRegisterEvent(event.eventId, event.title)}
                   className={
-                    registeredEvents.includes(event.id) ? "w-full bg-green-600 hover:bg-green-700 mb-4" : "w-full mb-4"
+                    registeredEvents.includes(event.eventId as any) ? "w-full bg-green-600 hover:bg-green-700 mb-4" : "w-full mb-4 hover-lift hover:scale-[1.02] transition-transform"
                   }
                 >
-                  {registeredEvents.includes(event.id) ? "✓ Registered" : "Register"}
+                  {registeredEvents.includes(event.eventId as any) ? "✓ Registered" : "Register"}
                 </Button>
                 <div className="border-t border-border pt-4">
                   <button
-                    onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
+                    onClick={() => setExpandedEvent(expandedEvent === event.eventId as any ? null : event.eventId as any)}
                     className="text-sm font-medium text-primary hover:underline flex items-center gap-2"
                   >
                     <span>💬</span>
-                    {expandedEvent === event.id ? "Hide" : "Ask a Query"}
+                    {expandedEvent === event.eventId as any ? "Hide" : "Ask a Query"}
                   </button>
-                  {expandedEvent === event.id && (
+                  {expandedEvent === event.eventId as any && (
                     <div className="mt-4 space-y-3">
                       <textarea
                         value={queryText}
@@ -125,15 +161,15 @@ export default function UserDashboard() {
                         className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                       />
                       <button
-                        onClick={() => handleSubmitQuery(event.id)}
+                        onClick={() => handleSubmitQuery(event.eventId as any)}
                         className="w-full px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm transition-colors"
                       >
                         Send Query
                       </button>
-                      {getEventQueries(event.id).length > 0 && (
+                      {getEventQueries(event.eventId as any).length > 0 && (
                         <div className="bg-muted/50 rounded-lg p-3 mt-3 text-xs space-y-2 max-h-32 overflow-y-auto">
                           <div className="font-medium text-foreground">Your Queries:</div>
-                          {getEventQueries(event.id).map((query) => (
+                          {getEventQueries(event.eventId as any).map((query) => (
                             <div key={query.id} className="bg-background p-2 rounded border border-border text-xs">
                               <div className="text-foreground">{query.message}</div>
                               <div className="text-muted-foreground mt-1">
@@ -231,6 +267,13 @@ export default function UserDashboard() {
         </section>
       </main>
       <GlobalChat userType="student" myId={1} />
+      
+      <EventRegistrationModal
+        isOpen={registrationModal.isOpen}
+        eventTitle={registrationModal.eventTitle}
+        onClose={() => setRegistrationModal({ isOpen: false, eventId: null, eventTitle: "" })}
+        onSubmit={handleRegistrationSubmit}
+      />
     </div>
   )
 }
