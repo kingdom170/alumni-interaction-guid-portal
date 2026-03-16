@@ -9,9 +9,10 @@ import { sendMessage, subscribeToConversation, generateConversationId, type Mess
 
 export default function ChatPage() {
   const params = useParams()
-  const alumniId = Number.parseInt(params.alumniId as string)
-  const alumni = alumniData.find((a) => a.id === alumniId)
-
+  const alumniIdParam = params.alumniId as string
+  
+  const [alumni, setAlumni] = useState<any>(null)
+  const [loadingAlumni, setLoadingAlumni] = useState(true)
   const [messages, setMessages] = useState<MessageData[]>([])
   const [inputMessage, setInputMessage] = useState("")
   const [userType, setUserType] = useState<"user" | "teacher" | "alumni">("user")
@@ -19,6 +20,47 @@ export default function ChatPage() {
   const [userName, setUserName] = useState("")
   const [userRole, setUserRole] = useState<"student" | "alumni">("student")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Fetch alumni data
+  useEffect(() => {
+    const fetchAlumni = async () => {
+      setLoadingAlumni(true)
+      try {
+        // Try mock data first (converting param to number)
+        const numericId = Number.parseInt(alumniIdParam)
+        const mockAlumni = !isNaN(numericId) ? alumniData.find((a) => a.id === numericId) : null
+
+        if (mockAlumni) {
+          setAlumni(mockAlumni)
+        } else {
+          // If not in mock data, try Firestore
+          const { getUserProfile } = await import("@/lib/firestore/helpers")
+          const firestoreUser = await getUserProfile(alumniIdParam)
+          
+          if (firestoreUser && firestoreUser.role === "alumni") {
+            // Map Firestore user to the format expected by the UI
+            setAlumni({
+              id: firestoreUser.userId,
+              name: firestoreUser.name,
+              email: firestoreUser.email,
+              profession: (firestoreUser as any).profession || (firestoreUser as any).position || "Alumni",
+              company: (firestoreUser as any).company || "Company",
+              image: (firestoreUser as any).image || "👨‍💼",
+              batch: (firestoreUser as any).batch
+            })
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching alumni:", error)
+      } finally {
+        setLoadingAlumni(false)
+      }
+    }
+
+    if (alumniIdParam) {
+      fetchAlumni()
+    }
+  }, [alumniIdParam])
 
   // Detect user type and load user info from localStorage
   useEffect(() => {
@@ -88,8 +130,27 @@ export default function ChatPage() {
     }
   }
 
+  if (loadingAlumni) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading alumni information...</p>
+      </div>
+    )
+  }
+
   if (!alumni) {
-    return <div>Alumni not found</div>
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar userType={userType} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Alumni not found</h2>
+            <p className="text-muted-foreground mb-4">The alumni you are looking for could not be found.</p>
+            <Button onClick={() => window.history.back()}>Go Back</Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

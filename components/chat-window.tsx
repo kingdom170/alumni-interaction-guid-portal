@@ -32,8 +32,13 @@ export function ChatWindow({ myId, myName, myRole, targetId, targetName, onClose
         const unsubscribe = subscribeToConversation(conversationId, (newMessages) => {
             setMessages(newMessages)
         })
+
+        // Mark as read when opening
+        const { markMessagesAsRead } = require("@/lib/firestore/chat-service")
+        markMessagesAsRead(conversationId, myRole)
+
         return () => unsubscribe()
-    }, [conversationId])
+    }, [conversationId, myRole])
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

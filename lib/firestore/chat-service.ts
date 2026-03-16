@@ -166,7 +166,27 @@ export function subscribeToConversation(
 }
 
 /**
- * Get all conversations for a user
+ * Subscribe to all conversations for a user
+ */
+export function subscribeToUserConversations(
+    userId: string,
+    userRole: "student" | "alumni",
+    onUpdate: (conversations: ConversationData[]) => void
+): () => void {
+    const conversationsRef = collection(db, "conversations")
+    const fieldPath = userRole === "student" ? "participants.studentId" : "participants.alumniId"
+    const q = query(conversationsRef, where(fieldPath, "==", userId), orderBy("updatedAt", "desc"))
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const conversations = snapshot.docs.map((doc) => doc.data() as ConversationData)
+        onUpdate(conversations)
+    })
+
+    return unsubscribe
+}
+
+/**
+ * Get all conversations for a user (non-realtime)
  */
 export async function getUserConversations(userId: string, userRole: "student" | "alumni"): Promise<ConversationData[]> {
     try {

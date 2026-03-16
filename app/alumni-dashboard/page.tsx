@@ -12,7 +12,7 @@ import { ChatWindow } from "@/components/chat-window"
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/lib/firebase"
-import { getUserConversations, type ConversationData } from "@/lib/firestore/chat-service"
+import { subscribeToUserConversations, type ConversationData } from "@/lib/firestore/chat-service"
 import { createJob, getJobsByAlumni, deleteJob, getJobApplications, type JobData, type JobApplicationData } from "@/lib/firestore/job-service"
 import { useRouter } from "next/navigation"
 
@@ -48,6 +48,7 @@ export default function AlumniDashboard() {
   const [selectedChat, setSelectedChat] = useState<{ id: string; name: string } | null>(null)
   const [students, setStudents] = useState<StudentUser[]>([])
   const [loadingStudents, setLoadingStudents] = useState(true)
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
   const router = useRouter()
 
   useEffect(() => {
@@ -72,14 +73,24 @@ export default function AlumniDashboard() {
     return () => unsubscribe()
   }, [router])
 
-  const loadConversations = async (userId: string) => {
-    try {
-      const convos = await getUserConversations(userId, "alumni")
+  useEffect(() => {
+    if (!profile?.email) return
+
+    const unsubscribe = subscribeToUserConversations(profile.email, "alumni", (convos) => {
       setConversations(convos)
-    } catch (error) {
-      console.error("Error loading conversations:", error)
-    }
-  }
+      
+      // Calculate unread counts per student
+      const counts: Record<string, number> = {}
+      convos.forEach(convo => {
+        if (convo.unreadCount.alumni > 0) {
+          counts[convo.participants.studentId] = convo.unreadCount.alumni
+        }
+      })
+      setUnreadCounts(counts)
+    })
+
+    return () => unsubscribe()
+  }, [profile])
 
   const loadStudents = async () => {
     setLoadingStudents(true)
@@ -122,7 +133,6 @@ export default function AlumniDashboard() {
 
   useEffect(() => {
     if (profile?.uid) {
-      loadConversations(profile.uid)
       loadStudents()
       loadPostedJobs(profile.uid)
     }
@@ -460,8 +470,14 @@ export default function AlumniDashboard() {
                   {students.map((student) => (
                     <div
                       key={student.uid}
-                      className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-all flex flex-col items-center text-center"
+                      className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-all flex flex-col items-center text-center relative"
                     >
+                      {unreadCounts[student.uid] > 0 && (
+                        <span className="absolute top-3 right-3 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                        </span>
+                      )}
                       <div className="text-4xl mb-3">{student.image}</div>
                       <h3 className="font-semibold text-foreground text-lg">{student.name}</h3>
                       <p className="text-sm text-muted-foreground mb-1">{student.course || "Student"}</p>
@@ -817,7 +833,6 @@ export default function AlumniDashboard() {
           targetName={selectedChat.name}
           onClose={() => {
             setSelectedChat(null)
-            if (profile?.uid) loadConversations(profile.uid) // Refresh list when closing
           }}
         />
       )}
