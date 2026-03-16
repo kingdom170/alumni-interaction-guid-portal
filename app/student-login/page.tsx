@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 
@@ -15,6 +15,10 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [showForgot, setShowForgot] = useState(false)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetStatus, setResetStatus] = useState<"idle" | "success" | "error">("idle")
+  const [resetMessage, setResetMessage] = useState("")
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,6 +60,23 @@ export default function StudentLoginPage() {
     } catch (err: any) {
       console.error("Login error:", err)
       setError("Invalid email or password")
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetEmail.trim()) {
+      setResetMessage("Please enter your email address.")
+      setResetStatus("error")
+      return
+    }
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim().toLowerCase())
+      setResetStatus("success")
+      setResetMessage("✅ Password reset email sent! Check your inbox.")
+    } catch (err: any) {
+      setResetStatus("error")
+      setResetMessage(err.code === "auth/user-not-found" ? "No account found with this email." : "Failed to send reset email. Please try again.")
     }
   }
 
@@ -136,6 +157,36 @@ export default function StudentLoginPage() {
               </Button>
             </div>
           </form>
+
+          {/* Forgot Password */}
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => { setShowForgot(!showForgot); setResetStatus("idle"); setResetMessage("") }}
+              className="text-sm text-accent hover:underline transition-colors"
+            >
+              {showForgot ? "Back to Login" : "Forgot Password?"}
+            </button>
+          </div>
+
+          {showForgot && (
+            <form onSubmit={handleForgotPassword} className="mt-4 space-y-3 border-t border-border pt-4 animate-fade-in-up">
+              <p className="text-sm text-muted-foreground">Enter your email to receive a reset link.</p>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => { setResetEmail(e.target.value); setResetStatus("idle"); setResetMessage("") }}
+                placeholder="your@college.edu"
+                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+              />
+              {resetMessage && (
+                <p className={`text-sm ${resetStatus === "success" ? "text-green-500" : "text-red-500"}`}>{resetMessage}</p>
+              )}
+              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 py-2 h-auto text-sm">
+                Send Reset Link
+              </Button>
+            </form>
+          )}
 
           {/* Back Link */}
           <div className="mt-4 text-center">
