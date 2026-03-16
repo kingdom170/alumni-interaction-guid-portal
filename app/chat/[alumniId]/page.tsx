@@ -46,8 +46,9 @@ export default function ChatPage() {
     if (!userId || !alumni) return
 
     // Use alumni email if available, otherwise fallback to ID
-    const alumniId = alumni.email || alumni.id.toString()
-    const conversationId = generateConversationId(userId, alumniId)
+    const targetAlumniId = alumni.email || alumni.id.toString()
+    // Important: consistently use the student's email (userId) as their identifier
+    const conversationId = generateConversationId(userId, targetAlumniId)
     const unsubscribe = subscribeToConversation(conversationId, (newMessages) => {
       setMessages(newMessages)
     })
@@ -66,8 +67,8 @@ export default function ChatPage() {
   const handleSendMessage = async () => {
     if (inputMessage.trim() && userId && alumni) {
       try {
-        const alumniId = alumni.email || alumni.id.toString()
-        const conversationId = generateConversationId(userId, alumniId)
+        const targetAlumniId = alumni.email || alumni.id.toString()
+        const conversationId = generateConversationId(userId, targetAlumniId)
 
         await sendMessage(
           conversationId,
@@ -75,7 +76,7 @@ export default function ChatPage() {
           userName,
           userRole,
           inputMessage,
-          alumniId,
+          targetAlumniId,
           alumni.name
         )
 

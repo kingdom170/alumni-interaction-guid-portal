@@ -295,14 +295,14 @@ export default function AlumniDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-border overflow-x-auto">
+        <div className="flex gap-2 mb-8 border-b border-border/50 pb-2 overflow-x-auto scroolbar-hide">
           {(["dashboard", "messages", "post-jobs", "resume-reviews", "reviews", "profile"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 whitespace-nowrap ${activeTab === tab
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
+                : "bg-muted/30 text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:scale-105"
                 }`}
             >
               {tab === "post-jobs"
@@ -318,50 +318,62 @@ export default function AlumniDashboard() {
 
         {/* Dashboard Tab */}
         {activeTab === "dashboard" && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fade-in-up">
             {/* Welcome */}
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-lg p-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Welcome, {profile?.name || "Alumni"}!</h1>
-              <p className="text-muted-foreground">Thank you for giving back to the alumni community</p>
+            <div className="relative overflow-hidden glass-card rounded-2xl p-10 border-primary/20 premium-shadow">
+              <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl opacity-50 pointer-events-none animate-pulse-gentle"></div>
+              <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-60 h-60 bg-secondary/20 rounded-full blur-3xl opacity-50 pointer-events-none animate-float delay-200"></div>
+              <div className="relative z-10">
+                <h1 className="text-4xl font-extrabold mb-3 text-gradient-primary">Welcome back, {profile?.name || "Alumni"}!</h1>
+                <p className="text-lg text-muted-foreground/90 font-medium">Thank you for giving back to the community and guiding the next generation.</p>
+              </div>
             </div>
 
             {/* Stats */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-primary mb-2">12</div>
-                <p className="text-sm text-muted-foreground">Students Mentored</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-primary">
+                <div className="text-4xl font-black text-gradient-primary mb-2">12</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Students Mentored</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-accent mb-2">28</div>
-                <p className="text-sm text-muted-foreground">Chat Messages</p>
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-secondary">
+                <div className="text-4xl font-black text-secondary mb-2">28</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Chat Messages</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-primary mb-2">5</div>
-                <p className="text-sm text-muted-foreground">Events Hosted</p>
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-accent">
+                <div className="text-4xl font-black text-accent mb-2">5</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Events Hosted</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-accent mb-2">{postedJobs.length}</div>
-                <p className="text-sm text-muted-foreground">Jobs Posted</p>
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-primary">
+                <div className="text-4xl font-black text-gradient-primary mb-2">{postedJobs.length}</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Jobs Posted</p>
               </div>
             </div>
 
             {/* Recent Activity */}
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-6">Recent Student Queries</h2>
-              <div className="space-y-4">
-                {studentQueries.slice(0, 2).map((query) => (
+            <div className="animate-fade-in-up delay-200">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground">Recent Student Queries</h2>
+              </div>
+              <div className="grid gap-4">
+                {studentQueries.slice(0, 2).map((query, idx) => (
                   <div
                     key={query.id}
-                    className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors"
+                    className={`glass-card rounded-xl p-6 hover-lift border-l-4 border-l-primary/50 transition-all duration-300 animate-slide-down delay-${(idx+1)*100}`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-foreground mb-2">{query.studentName}</h3>
-                        <p className="text-muted-foreground mb-2">{query.question}</p>
-                        <p className="text-xs text-muted-foreground">{query.timestamp}</p>
+                        <div className="flex items-center gap-3 mb-2">
+                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                             {query.studentName.charAt(0)}
+                           </div>
+                           <h3 className="font-semibold text-foreground">{query.studentName}</h3>
+                           <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{query.timestamp}</span>
+                        </div>
+                        <p className="text-muted-foreground/90 pl-11">{query.question}</p>
                       </div>
                       <Button
                         size="sm"
+                        className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors shadow-none rounded-lg"
                         onClick={() => {
                           const student = students.find((s: StudentUser) => s.email === query.studentEmail)
                           if (student) {
@@ -462,7 +474,7 @@ export default function AlumniDashboard() {
                         className="w-full"
                         onClick={() =>
                           setSelectedChat({
-                            id: student.uid,
+                            id: student.email,
                             name: student.name,
                           })
                         }
@@ -818,61 +830,48 @@ export default function AlumniDashboard() {
           targetId={chatStudentId}
           onClose={() => setChatStudentId(null)}
         />
-      )} 
+      )}
       */}
 
-      {showApplicantsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">
-                Job Applications
-              </h2>
-              <button
-                onClick={() => {
-                  setShowApplicantsModal(false)
-                  setSelectedJobId(null)
-                  setJobApplicants([])
-                }}
-                className="text-muted-foreground hover:text-foreground text-xl leading-none"
-              >
-                &times;
-              </button>
+      {/* Make sure we have the applicants modal */}
+      {showApplicantsModal && selectedJobId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <h2 className="text-xl font-bold">Applicants</h2>
+              <Button variant="ghost" size="icon" onClick={() => setShowApplicantsModal(false)}>
+                ✕
+              </Button>
             </div>
-
-            <div className="overflow-y-auto flex-1 pr-2">
+            
+            <div className="p-6 overflow-y-auto flex-1">
               {loadingApplicants ? (
                 <div className="text-center py-8 text-muted-foreground">Loading applicants...</div>
-              ) : jobApplicants.length > 0 ? (
+              ) : jobApplicants.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No applications yet.</div>
+              ) : (
                 <div className="space-y-4">
                   {jobApplicants.map((app) => (
-                    <div key={app.applicationId} className="bg-muted/30 border border-border p-4 rounded-lg flex items-center justify-between gap-4 flex-wrap">
+                    <div key={app.applicationId} className="glass-card p-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
-                        <h4 className="font-semibold text-foreground">{app.studentName}</h4>
-                        <a href={`mailto:${app.studentEmail}`} className="text-sm text-primary hover:underline">{app.studentEmail}</a>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Applied: {app.appliedAt && 'toDate' in app.appliedAt ? app.appliedAt.toDate().toLocaleDateString() : 'Recently'}
-                        </p>
+                        <h3 className="font-semibold text-foreground">{app.studentName}</h3>
+                        <p className="text-sm text-muted-foreground">{app.studentEmail}</p>
                       </div>
-                      <div className="flex gap-2">
-                        {/* We could add logic later to reject/accept or view resume. For now, email is the primary contact method. */}
-                        <a href={`mailto:${app.studentEmail}`}>
-                          <Button size="sm">Email Student</Button>
+                      <div className="text-sm text-right">
+                        <p className="text-muted-foreground mb-1">Applied on: {app.appliedAt && 'toDate' in app.appliedAt ? app.appliedAt.toDate().toLocaleDateString() : 'Recently'}</p>
+                        <a 
+                          href={app.resumeUrl} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          View Resume
                         </a>
                       </div>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="text-4xl mb-3">📄</div>
-                  <p>No applications yet for this job.</p>
-                </div>
               )}
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-border flex justify-end">
-              <Button variant="outline" onClick={() => setShowApplicantsModal(false)}>Close</Button>
             </div>
           </div>
         </div>

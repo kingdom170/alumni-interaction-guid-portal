@@ -45,11 +45,11 @@ export default function CareerAssessmentPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => setQuizStarted(true)} className="px-8">
+              <Button size="lg" onClick={() => setQuizStarted(true)} className="px-8 transition-transform hover:scale-105 hover-lift">
                 Start Assessment Quiz
               </Button>
               <Link href="/career-helper">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 bg-transparent">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 bg-transparent transition-transform hover:scale-105 hover-lift">
                   Explore Career Paths
                 </Button>
               </Link>

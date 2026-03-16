@@ -327,14 +327,14 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-border overflow-x-auto">
+        <div className="flex gap-2 mb-8 border-b border-border/50 pb-2 overflow-x-auto scroolbar-hide">
           {(["overview", "post-event", "post-course", "queries", "alumni", "reviews"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 whitespace-nowrap ${activeTab === tab
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
+                : "bg-muted/30 text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:scale-105"
                 }`}
             >
               {tab === "post-event"
@@ -350,26 +350,26 @@ export default function TeacherDashboard() {
 
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fade-in-up">
             {/* Stats Cards */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-blue-600 mb-2">{postedEvents.length}</div>
-                <p className="text-muted-foreground">Total Events Posted</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-primary">
+                <div className="text-4xl font-black text-gradient-primary mb-2">{postedEvents.length}</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Events Posted</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-green-600 mb-2">{postedEvents.length * 25 + postedCourses.length * 15}</div>
-                <p className="text-muted-foreground">Total Attendees</p>
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-secondary">
+                <div className="text-4xl font-black text-secondary mb-2">{postedEvents.length * 25 + postedCourses.length * 15}</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Attendees</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-accent">
+                <div className="text-4xl font-black text-accent mb-2">
                   {queries.filter((q) => !q.replied).length}
                 </div>
-                <p className="text-muted-foreground">Pending Queries</p>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Pending Queries</p>
               </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="text-3xl font-bold text-orange-600 mb-2">{queries.filter((q) => q.replied).length}</div>
-                <p className="text-muted-foreground">Replied Queries</p>
+              <div className="glass-card rounded-2xl p-6 hover-lift border-t-4 border-t-primary">
+                <div className="text-4xl font-black text-gradient-primary mb-2">{queries.filter((q) => q.replied).length}</div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Replied Queries</p>
               </div>
             </div>
 
@@ -389,40 +389,40 @@ export default function TeacherDashboard() {
               </div>
 
               {postedEvents.length === 0 ? (
-                <div className="text-center py-12 bg-card border border-border rounded-lg">
+                <div className="text-center py-12 glass-card rounded-2xl">
                   <p className="text-muted-foreground mb-4">No events posted yet</p>
                   <Button
                     onClick={() => {
                       setActiveTab("post-event")
                       setShowForm(true)
                     }}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30"
                   >
                     Post Your First Event
                   </Button>
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {postedEvents.map((event) => (
+                  {postedEvents.map((event, idx) => (
                     <div
                       key={event.id}
-                      className="bg-card border border-border rounded-lg p-6 hover:border-blue-500 transition-colors"
+                      className={`glass-card rounded-2xl p-6 hover-lift border-l-4 border-l-primary/50 transition-all duration-300 animate-slide-down delay-${(idx+1)*100}`}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <div className="text-sm font-medium text-blue-600 mb-1">{event.category}</div>
-                          <h3 className="text-lg font-semibold text-foreground">{event.title}</h3>
+                          <div className="text-xs font-bold px-2 py-1 bg-primary/10 text-primary rounded inline-block mb-2 uppercase tracking-wide">{event.category}</div>
+                          <h3 className="text-xl font-bold text-foreground">{event.title}</h3>
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setEditingEvent({ eventId: event.id.toString(), title: event.title, description: event.description, date: event.date, time: event.time, category: event.category, createdBy: teacherEmail, createdByName: "", createdByRole: "teacher", status: "upcoming" })}
-                            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                            className="text-primary hover:text-primary/80 font-medium text-sm transition-colors"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteEvent(event.id.toString())}
-                            className="text-red-600 hover:text-red-700 font-medium text-sm"
+                            className="text-destructive hover:text-destructive/80 font-medium text-sm transition-colors"
                           >
                             Delete
                           </button>

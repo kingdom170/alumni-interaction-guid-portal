@@ -21,8 +21,9 @@ export function ChatWindow({ myId, myName, myRole, targetId, targetName, onClose
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     // Determine conversation ID based on roles
-    // If I am alumni, studentId is targetId
-    // If I am student, studentId is myId
+    // If I am alumni, studentId is targetId, and alumniId is myId. 
+    // If I am student, studentId is myId, and alumniId is targetId.
+    // The format is ALWAYS generateConversationId(studentId, alumniId)
     const conversationId = myRole === "student"
         ? generateConversationId(myId, targetId)
         : generateConversationId(targetId, myId)

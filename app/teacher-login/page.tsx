@@ -59,8 +59,12 @@ export default function TeacherLoginPage()
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative overflow-hidden bg-background flex flex-col items-center justify-center px-4">
+      {/* Animated Background Orbs */}
+      <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-secondary/20 rounded-full blur-[100px] opacity-60 pointer-events-none animate-pulse-gentle"></div>
+      <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-primary/20 rounded-full blur-[100px] opacity-60 pointer-events-none animate-float delay-200"></div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8 opacity-0-init animate-fade-in-up">
           <div className="inline-flex items-center justify-center gap-2 mb-4">
@@ -74,7 +78,7 @@ export default function TeacherLoginPage()
         </div>
 
         {/* Login Card */}
-        <div className="bg-card border border-border rounded-lg p-8 shadow-lg opacity-0-init animate-scale-in delay-200">
+        <div className="glass-card rounded-2xl p-8 premium-shadow opacity-0-init animate-scale-in delay-200 border-t-4 border-t-secondary">
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Email */}
             <div>

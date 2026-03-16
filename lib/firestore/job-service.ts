@@ -40,6 +40,7 @@ export interface JobApplicationData {
     appliedAt: Timestamp | Date
     status: "pending" | "reviewed" | "accepted" | "rejected"
     resumeId?: string
+    resumeUrl?: string
 }
 
 /**

@@ -221,11 +221,11 @@ export function CareerAssessmentQuiz({ onComplete }: CareerAssessmentQuizProps) 
                 setRecommendation(null)
               }}
               variant="outline"
-              className="flex-1"
+              className="flex-1 transition-all hover:scale-105 hover-lift"
             >
               Retake Quiz
             </Button>
-            <Button className="flex-1">Explore Opportunities</Button>
+            <Button className="flex-1 transition-all hover:scale-105 hover-lift">Explore Opportunities</Button>
           </div>
         </Card>
       </div>
@@ -261,7 +261,7 @@ export function CareerAssessmentQuiz({ onComplete }: CareerAssessmentQuizProps) 
             <button
               key={idx}
               onClick={() => handleAnswer(idx)}
-              className="w-full p-4 text-left border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all group"
+              className="w-full p-4 text-left border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-all group hover:-translate-y-1 hover:shadow-md"
             >
               <p className="font-medium text-foreground group-hover:text-primary">{option}</p>
             </button>

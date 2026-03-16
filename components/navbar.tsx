@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface NavbarProps {
   userType?: "alumni" | "user" | "teacher"
@@ -15,17 +16,9 @@ export function Navbar({ userType = "user", currentPage = "dashboard" }: NavbarP
 
   const navigationItems =
     userType === "alumni"
-      ? [
-          { label: "Dashboard", href: "/alumni-dashboard" },
-          { label: "Student Queries", href: "/alumni-dashboard?tab=queries" },
-          { label: "My Profile", href: "/alumni-dashboard?tab=profile" },
-        ]
+      ? []
       : userType === "teacher"
-        ? [
-            { label: "Dashboard", href: "/teacher-dashboard" },
-            { label: "Post Event", href: "/teacher-dashboard?tab=post-event" },
-            { label: "Post Course", href: "/teacher-dashboard?tab=post-course" },
-          ]
+        ? []
         : [
             { label: "Dashboard", href: "/user-dashboard" },
             { label: "Events", href: "/events" },
@@ -39,34 +32,48 @@ export function Navbar({ userType = "user", currentPage = "dashboard" }: NavbarP
           ]
 
   return (
-    <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+    <nav className="glass-card sticky top-0 z-40 bg-background/60 border-b border-white/10 shadow-sm transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/")}>
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">S</div>
-            <h1 className="text-lg font-bold text-foreground">Slumini</h1>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform duration-300">
+              S
+            </div>
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 tracking-tight">
+              Slumini
+            </h1>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navigationItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => router.push(item.href)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentPage === item.label.toLowerCase()
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="hidden md:flex items-center gap-2">
+            {navigationItems.map((item) => {
+              const isActive = currentPage === item.label.toLowerCase()
+              return (
+                <button
+                  key={item.href}
+                  onClick={() => router.push(item.href)}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden group ${
+                    isActive 
+                      ? "text-primary bg-primary/10 font-semibold" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <span className="relative z-10">{item.label}</span>
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary to-accent animate-scale-in" />
+                  )}
+                  {!isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-border transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left opacity-50" />
+                  )}
+                </button>
+              )
+            })}
           </div>
 
           {/* Logout Button */}
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={() => router.push("/")} className="hidden sm:inline-flex">
               Logout
             </Button>
